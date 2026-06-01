@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "dev": "tsx src/infrastructure/runtime/main.ts"
+    "dev": "tsx src/infrastructure/runtime/main.ts",
+    "list:groups": "tsx src/infrastructure/runtime/list-groups.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
@@ -24,6 +25,8 @@
     "vitest": "^3.2.1"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "^7.0.0-rc13"
+    "@whiskeysockets/baileys": "^7.0.0-rc13",
+    "dotenv": "^17.4.2",
+    "qrcode-terminal": "^0.12.0"
   }
 }

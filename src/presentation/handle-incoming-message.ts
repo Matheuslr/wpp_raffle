@@ -1,6 +1,7 @@
 import type { IncomingMessage, MessageGateway } from "../application/ports/message-gateway.js";
 
 export interface HandleIncomingMessageDependencies {
+  readonly allowOwnMessages?: boolean;
   readonly authorizedGroupIds: ReadonlySet<string>;
   readonly gateway: MessageGateway;
   readonly executeDraw: (rawMessage: string) => Promise<string>;
@@ -10,7 +11,15 @@ export async function handleIncomingMessage(
   message: IncomingMessage,
   dependencies: HandleIncomingMessageDependencies
 ): Promise<void> {
-  if (message.fromMe || !message.isGroup || !dependencies.authorizedGroupIds.has(message.chatId)) {
+  if (message.fromMe && dependencies.allowOwnMessages !== true) {
+    return;
+  }
+
+  if (!message.isGroup) {
+    return;
+  }
+
+  if (!dependencies.authorizedGroupIds.has(message.chatId)) {
     return;
   }
 

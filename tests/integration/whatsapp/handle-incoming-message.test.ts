@@ -67,6 +67,24 @@ describe("handleIncomingMessage", () => {
     expect(gateway.sentMessages).toEqual([]);
   });
 
+  it("can allow messages sent by the bot itself for local testing", async () => {
+    const gateway = new FakeGateway();
+    const calls: string[] = [];
+
+    await handleIncomingMessage(createMessage({ fromMe: true }), {
+      allowOwnMessages: true,
+      authorizedGroupIds: new Set(["authorized-group"]),
+      gateway,
+      executeDraw: async (rawMessage) => {
+        calls.push(rawMessage);
+        return "draw response";
+      }
+    });
+
+    expect(calls).toEqual(["!sortear"]);
+    expect(gateway.sentMessages).toEqual([{ chatId: "authorized-group", text: "draw response" }]);
+  });
+
   it("ignores messages without the draw command", async () => {
     const gateway = new FakeGateway();
     let called = false;

@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import type { SeedProvider } from "../../application/ports/seed-provider.js";
 import { JsonDrawHistoryRepository } from "../persistence/json-draw-history-repository.js";
 import { startBaileysMessageGateway } from "../whatsapp/baileys-message-gateway.js";
@@ -20,6 +22,7 @@ if (process.env["RUN_WHATSAPP_GATEWAY"] !== "true") {
   const seedProvider = new SystemSeedProvider();
 
   await startBaileysMessageGateway({
+    allowOwnMessages: process.env["ALLOW_OWN_MESSAGES_FOR_LOCAL_TESTING"] === "true",
     authDirectory,
     authorizedGroupIds,
     executeDrawDependencies: {

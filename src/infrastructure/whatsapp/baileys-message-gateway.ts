@@ -1,4 +1,5 @@
 import {
+  extractMessageContent,
   fetchLatestBaileysVersion,
   makeWASocket,
   useMultiFileAuthState,
@@ -19,6 +20,7 @@ export interface BaileysGatewayOptions {
   readonly authDirectory: string;
   readonly authorizedGroupIds: ReadonlySet<string>;
   readonly executeDrawDependencies: ExecuteDrawDependencies;
+  readonly allowOwnMessages?: boolean;
 }
 
 export class BaileysMessageGateway implements MessageGateway {
@@ -63,6 +65,7 @@ async function handleMessages(
     }
 
     await handleIncomingMessage(message, {
+      allowOwnMessages: options.allowOwnMessages,
       authorizedGroupIds: options.authorizedGroupIds,
       gateway,
       executeDraw: (rawMessage) => executeDrawUseCase(rawMessage, options.executeDrawDependencies)
@@ -92,7 +95,7 @@ function toIncomingMessage(message: WAMessage): IncomingMessage | null {
 }
 
 function extractText(message: WAMessage): string | null {
-  const content = message.message;
+  const content = extractMessageContent(message.message);
 
   return content?.conversation ?? content?.extendedTextMessage?.text ?? null;
 }
