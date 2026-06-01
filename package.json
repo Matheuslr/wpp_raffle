@@ -10,6 +10,8 @@
     "lint": "eslint .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/infrastructure/runtime/main.js",
     "dev": "tsx src/infrastructure/runtime/main.ts",
     "list:groups": "tsx src/infrastructure/runtime/list-groups.ts"
   },

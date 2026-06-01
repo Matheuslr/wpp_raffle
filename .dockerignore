@@ -1,0 +1,16 @@
+node_modules
+dist
+coverage
+.git
+.env
+.env.*
+.auth
+.auth-bot
+auth
+baileys-auth
+data
+history
+storage
+logs
+*.log
+*.local.json

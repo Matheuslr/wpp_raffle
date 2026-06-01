@@ -4,9 +4,11 @@ import {
   makeWASocket,
   useMultiFileAuthState,
   type BaileysEventMap,
+  type ConnectionState,
   type WAMessage,
   type WASocket
 } from "@whiskeysockets/baileys";
+import qrcode from "qrcode-terminal";
 import type { ExecuteDrawDependencies } from "../../application/execute-draw.js";
 import { executeDrawUseCase } from "../../application/execute-draw.js";
 import type {
@@ -15,12 +17,14 @@ import type {
   OutboundMessage
 } from "../../application/ports/message-gateway.js";
 import { handleIncomingMessage } from "../../presentation/handle-incoming-message.js";
+import { shouldReconnectAfterClose } from "./baileys-connection-policy.js";
 
 export interface BaileysGatewayOptions {
   readonly authDirectory: string;
   readonly authorizedGroupIds: ReadonlySet<string>;
   readonly executeDrawDependencies: ExecuteDrawDependencies;
   readonly allowOwnMessages?: boolean;
+  readonly onRecoverableDisconnect?: () => void;
 }
 
 export class BaileysMessageGateway implements MessageGateway {
@@ -28,6 +32,10 @@ export class BaileysMessageGateway implements MessageGateway {
 
   public async sendTextMessage(message: OutboundMessage): Promise<void> {
     await this.socket.sendMessage(message.chatId, { text: message.text });
+  }
+
+  public close(): void {
+    this.socket.end(new Error("Gateway shutdown requested."));
   }
 }
 
@@ -48,8 +56,35 @@ export async function startBaileysMessageGateway(
   socket.ev.on("messages.upsert", async (event) => {
     await handleMessages(event, gateway, options);
   });
+  socket.ev.on("connection.update", (update) => {
+    handleConnectionUpdate(update, options);
+  });
 
   return gateway;
+}
+
+function handleConnectionUpdate(
+  update: Partial<ConnectionState>,
+  options: BaileysGatewayOptions
+): void {
+  if (update.qr) {
+    console.info("WhatsApp QR code received. Scan it from the container logs:");
+    qrcode.generate(update.qr, { small: true });
+  }
+
+  if (update.connection !== "close") {
+    return;
+  }
+
+  if (shouldReconnectAfterClose(update.lastDisconnect?.error)) {
+    console.info("WhatsApp connection closed recoverably. Scheduling reconnect.");
+    options.onRecoverableDisconnect?.();
+    return;
+  }
+
+  console.error(
+    "WhatsApp connection closed with a terminal session error. Re-authentication is required."
+  );
 }
 
 async function handleMessages(

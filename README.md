@@ -66,6 +66,10 @@ Manual test in an authorized WhatsApp group
 - Baileys session/authentication files must remain local and never be committed.
 - Baileys is an unofficial linked-device integration. This MVP accepts that trade-off because it is private and very low volume.
 
+## Deployment
+
+For the minimal DigitalOcean Droplet deployment using Docker Compose, see [docs/deployment-digitalocean.md](docs/deployment-digitalocean.md).
+
 ## Official Codex References
 
 - AGENTS.md project instructions: https://developers.openai.com/codex/guides/agents-md
