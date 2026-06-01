@@ -17,7 +17,7 @@ export class DrawCommandParseError extends Error {
 
 const command = "!sortear";
 const participantListMarker = "lista";
-const categoryPattern = /^([^:]+):\s*(\d+)\s*$/;
+const categoryPattern = /^([^:]*):\s*(\S+)\s*$/;
 const numberedParticipantPattern = /^\d+\s*(?:[-.]|-\s*)\s*(.+)$/;
 
 export function parseDrawCommand(text: string): ParsedDrawCommand {
@@ -78,7 +78,7 @@ function parseCategory(line: string): ParsedPrizeCategory | null {
   const rawName = match[1];
   const rawQuantity = match[2];
 
-  if (!rawName || !rawQuantity) {
+  if (rawName === undefined || rawQuantity === undefined) {
     return null;
   }
 

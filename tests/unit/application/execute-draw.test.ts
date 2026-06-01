@@ -109,4 +109,156 @@ Automóvel: 1`,
     );
     expect(repository.records).toHaveLength(0);
   });
+
+  it("returns a Portuguese validation response for a non-integer category quantity", async () => {
+    const repository = new FakeDrawHistoryRepository();
+
+    const response = await executeDrawUseCase(
+      `!sortear
+
+Lista
+João
+Pedro
+
+Sierra: 1.5`,
+      {
+        historyRepository: repository,
+        seedProvider: new FixedSeedProvider(1)
+      }
+    );
+
+    expect(response).toBe(
+      '❌ Não foi possível realizar o sorteio: a quantidade da categoria "Sierra" deve ser um número inteiro positivo.'
+    );
+    expect(repository.records).toHaveLength(0);
+  });
+
+  it("returns a Portuguese parser response when the participant list marker is missing", async () => {
+    const repository = new FakeDrawHistoryRepository();
+
+    const response = await executeDrawUseCase(
+      `!sortear
+
+João
+
+Sierra: 1`,
+      {
+        historyRepository: repository,
+        seedProvider: new FixedSeedProvider(1)
+      }
+    );
+
+    expect(response).toBe(
+      "❌ Não foi possível realizar o sorteio: informe a lista de participantes com o marcador Lista."
+    );
+    expect(repository.records).toHaveLength(0);
+  });
+
+  it("returns a Portuguese parser response when participants are missing", async () => {
+    const repository = new FakeDrawHistoryRepository();
+
+    const response = await executeDrawUseCase(
+      `!sortear
+
+Lista
+
+Sierra: 1`,
+      {
+        historyRepository: repository,
+        seedProvider: new FixedSeedProvider(1)
+      }
+    );
+
+    expect(response).toBe(
+      "❌ Não foi possível realizar o sorteio: informe pelo menos um participante."
+    );
+    expect(repository.records).toHaveLength(0);
+  });
+
+  it("returns a Portuguese parser response when categories are missing", async () => {
+    const repository = new FakeDrawHistoryRepository();
+
+    const response = await executeDrawUseCase(
+      `!sortear
+
+Lista
+João`,
+      {
+        historyRepository: repository,
+        seedProvider: new FixedSeedProvider(1)
+      }
+    );
+
+    expect(response).toBe(
+      "❌ Não foi possível realizar o sorteio: informe pelo menos uma categoria de prêmio."
+    );
+    expect(repository.records).toHaveLength(0);
+  });
+
+  it("returns a Portuguese validation response for a duplicate participant", async () => {
+    const repository = new FakeDrawHistoryRepository();
+
+    const response = await executeDrawUseCase(
+      `!sortear
+
+Lista
+João
+ joão 
+
+Sierra: 1`,
+      {
+        historyRepository: repository,
+        seedProvider: new FixedSeedProvider(1)
+      }
+    );
+
+    expect(response).toBe(
+      '❌ Não foi possível realizar o sorteio: o participante "joão" aparece mais de uma vez.'
+    );
+    expect(repository.records).toHaveLength(0);
+  });
+
+  it("returns a Portuguese validation response for a blank category", async () => {
+    const repository = new FakeDrawHistoryRepository();
+
+    const response = await executeDrawUseCase(
+      `!sortear
+
+Lista
+João
+
+   : 1`,
+      {
+        historyRepository: repository,
+        seedProvider: new FixedSeedProvider(1)
+      }
+    );
+
+    expect(response).toBe("❌ Não foi possível realizar o sorteio: há uma categoria sem nome.");
+    expect(repository.records).toHaveLength(0);
+  });
+
+  it("returns a Portuguese validation response for a duplicate category", async () => {
+    const repository = new FakeDrawHistoryRepository();
+
+    const response = await executeDrawUseCase(
+      `!sortear
+
+Lista
+João
+Pedro
+
+Sierra: 1
+ sierra : 1`,
+      {
+        historyRepository: repository,
+        seedProvider: new FixedSeedProvider(1)
+      }
+    );
+
+    expect(response).toBe(
+      '❌ Não foi possível realizar o sorteio: a categoria "sierra" aparece mais de uma vez.'
+    );
+    expect(repository.records).toHaveLength(0);
+  });
 });

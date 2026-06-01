@@ -83,6 +83,26 @@ describe("handleIncomingMessage", () => {
     expect(called).toBe(false);
     expect(gateway.sentMessages).toEqual([]);
   });
+
+  it("ignores private messages", async () => {
+    const gateway = new FakeGateway();
+    let called = false;
+
+    await handleIncomingMessage(
+      createMessage({ chatId: "5511999999999@s.whatsapp.net", isGroup: false }),
+      {
+        authorizedGroupIds: new Set(["authorized-group"]),
+        gateway,
+        executeDraw: async () => {
+          called = true;
+          return "draw response";
+        }
+      }
+    );
+
+    expect(called).toBe(false);
+    expect(gateway.sentMessages).toEqual([]);
+  });
 });
 
 function createMessage(overrides: Partial<IncomingMessage> = {}): IncomingMessage {
