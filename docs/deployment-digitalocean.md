@@ -69,8 +69,11 @@ docker compose version
 ```bash
 mkdir -p /opt/poker-draw-bot/runtime/auth
 mkdir -p /opt/poker-draw-bot/runtime/data
+chown -R 1000:1000 /opt/poker-draw-bot/runtime
 cd /opt/poker-draw-bot
 ```
+
+The container runs as the non-root Node.js user, which uses UID/GID `1000:1000` in the official Node image. The `chown` command is required so Baileys can write `/app/runtime/auth/creds.json` and the app can write draw history.
 
 ## 5. Clone The Repository
 
@@ -186,3 +189,23 @@ Do not use `docker compose restart` as the update mechanism after code, image, d
 - Backups of `/opt/poker-draw-bot/runtime/auth` are sensitive and should be treated as WhatsApp account credentials.
 - Draw history is stored in `/opt/poker-draw-bot/runtime/data/draw-history.json`.
 - Use `docker compose -f compose.prod.yml logs -f --tail=100` for operational logs.
+
+## Troubleshooting
+
+### `EACCES: permission denied, open '/app/runtime/auth/creds.json'`
+
+The host runtime directory is not writable by the non-root container user. Stop the container and fix ownership on the Droplet:
+
+```bash
+cd /opt/poker-draw-bot/app
+docker compose -f compose.prod.yml down
+chown -R 1000:1000 /opt/poker-draw-bot/runtime
+docker compose -f compose.prod.yml up --build
+```
+
+After QR authentication succeeds, start detached:
+
+```bash
+docker compose -f compose.prod.yml up -d
+docker compose -f compose.prod.yml logs -f --tail=100
+```
