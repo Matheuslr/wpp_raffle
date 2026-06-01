@@ -22,5 +22,8 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.33.1",
     "vitest": "^3.2.1"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc13"
   }
 }
